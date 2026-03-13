@@ -6,68 +6,127 @@
     <title>NASR CARD - دخول</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         body { font-family: 'Cairo', sans-serif; background: #f8fafc; }
-        .s-input { border: 1px solid #e2e8f0; border-radius: 10px; padding: 12px; width: 100%; outline: none; transition: 0.3s; }
-        .s-input:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1); }
-        .btn-sultan { background: #007bff; color: white; font-weight: bold; border-radius: 10px; padding: 12px; width: 100%; transition: 0.3s; }
-        .btn-sultan:hover { background: #0056b3; }
+        .s-input { border: 1px solid #e2e8f0; border-radius: 12px; padding: 14px; width: 100%; outline: none; transition: 0.3s; background: white; }
+        .s-input:focus { border-color: #3b82f6; box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1); }
+        .btn-sultan { background: #007bff; color: white; font-weight: bold; border-radius: 12px; padding: 14px; width: 100%; transition: 0.3s; border: none; cursor: pointer; }
+        .btn-google { background: white; color: #444; border: 1px solid #ddd; border-radius: 12px; padding: 12px; width: 100%; font-weight: bold; display: flex; align-items: center; justify-content: center; gap: 10px; transition: 0.3s; }
     </style>
 </head>
 <body class="flex items-center justify-center min-h-screen p-4">
-    <div class="bg-white p-8 rounded-2xl shadow-xl w-full max-w-sm border border-gray-100">
+
+    <div class="bg-white p-8 rounded-3xl shadow-2xl w-full max-w-md border border-gray-50">
         <div class="text-center mb-8">
-            <h1 class="text-3xl font-black text-blue-600 italic">NASR <span class="text-gray-800">CARD</span></h1>
-            <p class="text-gray-400 text-xs mt-2 uppercase tracking-widest">Digital Service Provider</p>
+            <h1 class="text-4xl font-black text-blue-600 italic">NASR <span class="text-gray-800">CARD</span></h1>
+            <p class="text-gray-400 text-xs mt-2 uppercase tracking-widest">Digital Solutions</p>
         </div>
         
+        <div class="flex gap-2 mb-6 bg-gray-100 p-1 rounded-xl">
+            <button onclick="toggleAuth('login')" id="loginTab" class="flex-1 py-2 rounded-lg font-bold text-sm bg-white shadow-sm text-blue-600">دخول</button>
+            <button onclick="toggleAuth('reg')" id="regTab" class="flex-1 py-2 rounded-lg font-bold text-sm text-gray-500">تسجيل جديد</button>
+        </div>
+
         <div id="loginForm" class="space-y-4">
             <input id="email" type="email" placeholder="البريد الإلكتروني" class="s-input">
             <input id="pass" type="password" placeholder="كلمة المرور" class="s-input">
-            <button onclick="login()" class="btn-sultan">تسجيل الدخول</button>
-            <p class="text-center text-sm text-gray-500">جديد هنا؟ <span onclick="toggle()" class="text-blue-600 cursor-pointer font-bold">أنشئ حساب</span></p>
+            <button onclick="login()" class="btn-sultan shadow-lg shadow-blue-200">دخول</button>
         </div>
 
         <div id="regForm" class="hidden space-y-4">
             <input id="regName" type="text" placeholder="الاسم بالكامل" class="s-input">
             <input id="regEmail" type="email" placeholder="البريد الإلكتروني" class="s-input">
             <input id="regPass" type="password" placeholder="كلمة المرور" class="s-input">
-            <button onclick="register()" class="btn-sultan bg-green-600 hover:bg-green-700">إنشاء الحساب</button>
-            <p class="text-center text-sm text-gray-500">لديك حساب؟ <span onclick="toggle()" class="text-blue-600 cursor-pointer font-bold">دخول</span></p>
+            <button onclick="register()" class="btn-sultan bg-green-600 shadow-lg shadow-green-100">إنشاء حساب</button>
         </div>
+
+        <div class="relative my-8">
+            <div class="absolute inset-0 flex items-center"><div class="w-full border-t border-gray-200"></div></div>
+            <div class="relative flex justify-center text-sm"><span class="px-2 bg-white text-gray-400">أو عبر</span></div>
+        </div>
+
+        <button onclick="loginWithGoogle()" class="btn-google hover:bg-gray-50">
+            <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="20">
+            متابعة باستخدام جوجل
+        </button>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-app.js";
-        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-auth.js";
-        import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-firestore.js";
+        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-firestore.js";
 
-        const firebaseConfig = { /* ضعي الكود هنا */ };
+        const firebaseConfig = {
+            apiKey: "AIzaSyAzsg4K2-AFKQwtlGbr--EszuUzQRQeYD8",
+            authDomain: "foforecharge.firebaseapp.com",
+            projectId: "foforecharge",
+            storageBucket: "foforecharge.firebasestorage.app",
+            messagingSenderId: "23143293034",
+            appId: "1:23143293034:web:2a5e4e1914a7a8c6776a13"
+        };
+
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
+        const provider = new GoogleAuthProvider();
 
-        window.toggle = () => {
-            document.getElementById('loginForm').classList.toggle('hidden');
-            document.getElementById('regForm').classList.toggle('hidden');
+        window.toggleAuth = (type) => {
+            const isLogin = type === 'login';
+            document.getElementById('loginForm').classList.toggle('hidden', !isLogin);
+            document.getElementById('regForm').classList.toggle('hidden', isLogin);
+            document.getElementById('loginTab').className = isLogin ? "flex-1 py-2 rounded-lg font-bold text-sm bg-white shadow-sm text-blue-600" : "flex-1 py-2 rounded-lg font-bold text-sm text-gray-500";
+            document.getElementById('regTab').className = !isLogin ? "flex-1 py-2 rounded-lg font-bold text-sm bg-white shadow-sm text-blue-600" : "flex-1 py-2 rounded-lg font-bold text-sm text-gray-500";
+        };
+
+        // تسجيل جوجل
+        window.loginWithGoogle = async () => {
+            try {
+                const result = await signInWithPopup(auth, provider);
+                const user = result.user;
+                // التحقق لو المستخدم موجود قبل كده
+                const userDoc = await getDoc(doc(db, "users", user.uid));
+                if (!userDoc.exists()) {
+                    await setDoc(doc(db, "users", user.uid), {
+                        name: user.displayName,
+                        email: user.email,
+                        balance: 0,
+                        role: "user"
+                    });
+                }
+            } catch (error) {
+                alert("خطأ في جوجل: " + error.message);
+            }
         };
 
         window.login = async () => {
-            try { await signInWithEmailAndPassword(auth, email.value, pass.value); } 
-            catch(e) { alert("بيانات الدخول غير صحيحة"); }
+            try {
+                await signInWithEmailAndPassword(auth, email.value, pass.value);
+            } catch (e) {
+                alert("بيانات الدخول غير صحيحة");
+            }
         };
 
         window.register = async () => {
+            if(!regName.value || !regEmail.value || !regPass.value) return alert("أكمل البيانات");
             try {
                 const res = await createUserWithEmailAndPassword(auth, regEmail.value, regPass.value);
-                await setDoc(doc(db, "users", res.user.uid), { name: regName.value, balance: 0, email: regEmail.value, role: "user" });
-                alert("تم التسجيل!");
-            } catch(e) { alert(e.message); }
+                // السطر ده هو اللي كان بيوقف التسجيل لو القواعد (Rules) مقفولة
+                await setDoc(doc(db, "users", res.user.uid), {
+                    name: regName.value,
+                    balance: 0,
+                    email: regEmail.value,
+                    role: "user"
+                });
+                alert("تم إنشاء الحساب!");
+            } catch (e) {
+                alert("خطأ في التسجيل: " + e.message);
+            }
         };
 
         onAuthStateChanged(auth, (user) => {
             if (user) {
-                if(user.email === "admin@nasr.com") window.location.href = "admin.html";
+                if (user.email === "admin@nasr.com") window.location.href = "admin.html";
                 else window.location.href = "dashboard.html";
             }
         });
