@@ -2,84 +2,129 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Nasr Card - الرئيسية</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <style> body { font-family: 'Cairo', sans-serif; background: #f8fafc; } </style>
+    <style>
+        body { font-family: 'Cairo', sans-serif; background: #0a0a0a; color: #fff; overflow-x: hidden; }
+        .gold-text { color: #d4af37; }
+        .gold-bg { background: linear-gradient(135deg, #d4af37, #f9d976); }
+        .dark-card { background: #161616; border: 1px solid #262626; border-radius: 20px; transition: 0.3s; overflow: hidden; }
+        .dark-card:active { transform: scale(0.95); border-color: #d4af37; }
+        .search-bar { background: #1a1a1a; border: 1px solid #333; border-radius: 50px; padding: 12px 45px 12px 20px; width: 100%; outline: none; color: #fff; font-size: 14px; }
+        .nav-blur { background: rgba(15, 15, 15, 0.9); backdrop-filter: blur(10px); border-bottom: 1px solid #222; }
+    </style>
 </head>
-<body class="pb-20">
-    <nav class="bg-white p-4 shadow-sm flex justify-between items-center sticky top-0 z-50">
-        <h1 class="text-xl font-bold text-blue-600">NASR <span class="text-gray-700">CARD</span></h1>
+<body class="pb-24">
+
+    <nav class="nav-blur p-4 flex justify-between items-center sticky top-0 z-50">
+        <div class="flex items-center gap-2">
+            <div class="w-8 h-8 gold-bg rounded-lg flex items-center justify-center text-black shadow-lg">
+                <i class="fas fa-crown text-sm"></i>
+            </div>
+            <h1 class="text-lg font-black italic gold-text tracking-tighter">NASR <span class="text-white">CARD</span></h1>
+        </div>
         <div class="flex items-center gap-3">
-            <span id="uName" class="text-sm font-bold text-gray-600">..</span>
-            <button onclick="signOutUser()" class="text-red-500"><i class="fas fa-sign-out-alt"></i></button>
+            <i class="fas fa-search text-gray-400"></i>
+            <button onclick="signOutUser()" class="text-gray-400 hover:text-red-500 transition-colors">
+                <i class="fas fa-sign-out-alt text-xl"></i>
+            </button>
         </div>
     </nav>
 
     <div class="p-4 max-w-md mx-auto">
         
-        <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 mb-6">
-            <div class="flex items-center gap-4 mb-5">
-                <div class="w-14 h-14 bg-gradient-to-tr from-blue-600 to-blue-400 text-white rounded-full flex items-center justify-center font-bold text-2xl shadow-lg border-2 border-white">
-                    <span id="userInitial">U</span>
-                </div>
+        <div class="relative w-full rounded-2xl overflow-hidden mb-6 shadow-2xl border border-[#333]">
+            <img src="https://img.freepik.com/free-vector/ramadan-kareem-banner-with-lanterns_1017-31181.jpg" class="w-full h-44 object-cover">
+            <div class="absolute bottom-0 bg-black/40 w-full p-2 backdrop-blur-sm">
+                <p class="text-[10px] text-center gold-text font-bold">كل عام وأنتم بخير - فريق نصر كارد يهنئكم</p>
+            </div>
+        </div>
+
+        <div class="relative mb-8">
+            <input type="text" placeholder="بحث عن تطبيق أو خدمة..." class="search-bar text-right">
+            <i class="fas fa-search absolute right-4 top-4 text-gray-500"></i>
+        </div>
+
+        <div class="dark-card p-4 mb-8 flex justify-between items-center bg-gradient-to-l from-[#1a1a1a] to-[#111]">
+            <div class="flex items-center gap-3">
+                <div id="userInitial" class="w-12 h-12 gold-bg rounded-full flex items-center justify-center text-black font-black text-xl shadow-lg border-2 border-black">U</div>
                 <div>
-                    <h2 id="uNameDisplay" class="font-bold text-gray-800 text-lg">..</h2>
-                    <p class="text-[10px] text-green-500 font-bold italic"><i class="fas fa-check-circle ml-1"></i>حساب موثق</p>
+                    <p id="uNameDisplay" class="font-bold text-sm">جاري التحميل..</p>
+                    <p class="text-[11px] text-gray-500">رصيدك: <span id="uBalance" class="gold-text font-bold text-sm">0</span> <span class="text-[9px]">EGP</span></p>
                 </div>
             </div>
-
-            <div class="bg-gray-50 p-3 rounded-xl flex justify-between items-center border border-gray-200">
-                <div class="flex-1 overflow-hidden">
-                    <p class="text-[9px] text-gray-400 font-bold uppercase">User ID / المعرف</p>
-                    <p id="uID" class="text-[11px] font-mono text-blue-600 font-bold mt-1 truncate">Loading..</p>
+            <div class="text-left bg-black/30 p-2 rounded-lg border border-white/5">
+                <p class="text-[8px] text-gray-500 mb-1 uppercase">ID المعرف</p>
+                <div class="flex items-center gap-2">
+                    <span id="uID" class="text-[10px] font-mono text-gray-300">..</span>
+                    <i onclick="copyID()" class="far fa-copy text-blue-400 text-xs cursor-pointer active:scale-75"></i>
                 </div>
-                <button onclick="copyID()" class="bg-white border border-gray-200 text-gray-400 w-9 h-9 rounded-lg hover:text-blue-600 transition-all flex items-center justify-center active:scale-90 shadow-sm">
-                    <i class="far fa-copy"></i>
-                </button>
             </div>
         </div>
 
-        <div class="bg-white p-6 rounded-2xl border-b-4 border-blue-600 shadow-sm mb-6 flex justify-between items-center">
-            <div>
-                <p class="text-xs text-gray-400">رصيد محفظتك</p>
-                <h2 class="text-3xl font-black text-gray-800 mt-1"><span id="uBalance">0</span> <span class="text-sm">EGP</span></h2>
-            </div>
-            <div class="w-12 h-12 bg-blue-50 rounded-full flex items-center justify-center text-blue-600">
-                <i class="fas fa-wallet text-xl"></i>
-            </div>
+        <div class="flex justify-between items-center mb-4 px-1">
+            <h3 class="font-black text-white text-sm italic">الأقسام المتاحة</h3>
+            <span class="text-[10px] gold-text">عرض الكل</span>
         </div>
 
-        <h3 class="font-bold text-gray-800 mb-4 px-1">الأقسام المتاحة</h3>
         <div class="grid grid-cols-2 gap-4">
-            <div onclick="window.location.href='product.html'" class="bg-white p-5 rounded-2xl shadow-sm border border-gray-50 flex flex-col items-center cursor-pointer hover:shadow-md transition">
-                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR_K73R8YisT8S-VqYyv-YwR_xP0Xp0VzR5rA&s" class="w-16 h-16 rounded-2xl mb-3 shadow-sm">
-                <span class="font-bold text-sm text-gray-800">FOFO CHAT</span>
-            </div>
-            <div onclick="window.location.href='https://wa.me/201055936987'" class="bg-white p-5 rounded-2xl shadow-sm border border-gray-50 flex flex-col items-center cursor-pointer hover:shadow-md transition text-center">
-                <div class="w-16 h-16 bg-green-50 rounded-2xl flex items-center justify-center text-green-600 mb-3 text-2xl">
-                    <i class="fas fa-plus"></i>
+            
+            <div onclick="window.location.href='product.html'" class="dark-card group">
+                <div class="relative h-32 overflow-hidden">
+                    <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR_K73R8YisT8S-VqYyv-YwR_xP0Xp0VzR5rA&s" class="w-full h-full object-cover group-hover:scale-110 transition duration-500">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black to-transparent"></div>
                 </div>
-                <span class="font-bold text-sm text-gray-800">شحن الرصيد</span>
+                <p class="p-3 text-center text-xs font-bold">برامج الدردشة</p>
             </div>
-        </div>
 
-        <div class="mt-6 space-y-3">
-            <button onclick="window.location.href='orders.html'" class="w-full bg-white p-4 rounded-xl shadow-sm text-right flex justify-between items-center border border-gray-50">
-                <span class="font-bold text-gray-700 text-sm"><i class="fas fa-history ml-2 text-blue-500"></i> سجل طلباتي</span>
-                <i class="fas fa-chevron-left text-gray-300"></i>
-            </button>
+            <div class="dark-card group opacity-80">
+                <div class="relative h-32 overflow-hidden">
+                    <img src="https://img.freepik.com/free-photo/view-illuminated-neon-gaming-keyboard-setup_23-2149529350.jpg" class="w-full h-full object-cover">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black to-transparent"></div>
+                    <span class="absolute top-2 left-2 bg-blue-600 text-[8px] px-2 py-1 rounded-full font-bold">قريباً</span>
+                </div>
+                <p class="p-3 text-center text-xs font-bold text-gray-400">شحن الألعاب</p>
+            </div>
+
+            <div onclick="window.location.href='https://wa.me/201055936987'" class="dark-card group">
+                <div class="h-32 gold-bg flex items-center justify-center text-black text-4xl">
+                    <i class="fas fa-wallet animate-bounce"></i>
+                </div>
+                <p class="p-3 text-center text-xs font-bold italic underline decoration-gold-text">شحن محفظتك</p>
+            </div>
+
+            <div onclick="window.location.href='orders.html'" class="dark-card group">
+                <div class="h-32 bg-[#222] flex items-center justify-center text-gray-400 text-4xl">
+                    <i class="fas fa-box-open"></i>
+                </div>
+                <p class="p-3 text-center text-xs font-bold">سجل العمليات</p>
+            </div>
+
         </div>
     </div>
+
+    <a href="https://wa.me/201055936987" class="fixed bottom-6 left-6 bg-[#25D366] w-14 h-14 rounded-full flex items-center justify-center shadow-[0_0_20px_rgba(37,211,102,0.4)] z-50 text-white text-2xl transition hover:scale-110 active:scale-90">
+        <i class="fab fa-whatsapp"></i>
+    </a>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-app.js";
         import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-auth.js";
         import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-firestore.js";
 
-        const firebaseConfig = { /* ضعي الكود هنا */ };
+        // تأكد من وضع إعدادات الفايربيز الخاصة بك هنا
+        const firebaseConfig = {
+            apiKey: "AIzaSyAzsg4K2-AFKQwtlGbr--EszuUzQRQeYD8",
+            authDomain: "foforecharge.firebaseapp.com",
+            projectId: "foforecharge",
+            storageBucket: "foforecharge.firebasestorage.app",
+            messagingSenderId: "23143293034",
+            appId: "1:23143293034:web:2a5e4e1914a7a8c6776a13"
+        };
+
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
@@ -88,40 +133,36 @@
             if (!user) {
                 window.location.href = "index.html";
             } else {
-                // عرض الـ UID
                 document.getElementById('uID').innerText = user.uid;
-                
-                const snap = await getDoc(doc(db, "users", user.uid));
-                if(snap.exists()){
-                    const data = snap.data();
-                    const name = data.name || "مستخدم";
-                    
-                    // تحديث النصوص في الصفحة
-                    document.getElementById('uName').innerText = name;
-                    document.getElementById('uNameDisplay').innerText = name;
-                    document.getElementById('uBalance').innerText = data.balance;
-                    document.getElementById('userInitial').innerText = name.charAt(0).toUpperCase();
-                }
+                try {
+                    const snap = await getDoc(doc(db, "users", user.uid));
+                    if(snap.exists()){
+                        const data = snap.data();
+                        document.getElementById('uNameDisplay').innerText = data.name;
+                        document.getElementById('uBalance').innerText = data.balance;
+                        document.getElementById('userInitial').innerText = data.name.charAt(0).toUpperCase();
+                    }
+                } catch(e) { console.error("Error loading data"); }
             }
         });
 
-        // دالة الخروج
+        // تم إصلاح زر تسجيل الخروج ليعمل بنسبة 100%
         window.signOutUser = () => {
-            signOut(auth).then(() => {
-                window.location.href = "index.html";
-            });
+            if(confirm("هل تريد تسجيل الخروج؟")) {
+                signOut(auth).then(() => {
+                    window.location.href = "index.html";
+                }).catch((error) => {
+                    alert("حدث خطأ أثناء الخروج");
+                });
+            }
         };
 
-        // دالة النسخ
         window.copyID = () => {
             const idText = document.getElementById('uID').innerText;
             navigator.clipboard.writeText(idText).then(() => {
-                alert("تم نسخ الـ ID بنجاح ✅");
+                alert("تم نسخ معرف الحساب ✅");
             });
         };
-    </script>
-</body>
-</html>
     </script>
 </body>
 </html>
