@@ -85,7 +85,7 @@
                 <i class="fas fa-home text-2xl"></i>
             </div>
         </div>
-        <div class="flex flex-col items-center gap-1 text-gray-500 opacity-30">
+        <div onclick="window.location.href='recharge.html'" class="flex flex-col items-center gap-1 text-gray-500 hover:text-[#f9d976] cursor-pointer transition-colors">
             <i class="fas fa-wallet text-xl"></i>
             <span class="text-[9px] font-bold">المحفظة</span>
         </div>
@@ -179,7 +179,6 @@
         window.openChatModal = () => document.getElementById('chatModal').classList.remove('hidden');
         window.closeChatModal = () => document.getElementById('chatModal').classList.add('hidden');
 
-        // دالة إرسال الطلب مع التحقق وخصم الرصيد
         window.sendOrder = async () => {
             const id = targetID.value.trim();
             const amt = coinInput.value;
@@ -187,11 +186,7 @@
             const currentBalance = Number(document.getElementById('uBalance').innerText);
             
             if(!id || amt < 100000) return alert("يرجى إدخال البيانات بشكل صحيح!");
-            
-            // التحقق من الرصيد
-            if (currentBalance < price) {
-                return alert("عذراً! رصيدك غير كافٍ لإتمام هذه العملية.");
-            }
+            if (currentBalance < price) return alert("عذراً! رصيدك غير كافٍ لإتمام هذه العملية.");
 
             const btn = document.getElementById('orderBtn');
             btn.disabled = true;
@@ -199,8 +194,6 @@
 
             try {
                 const uid = auth.currentUser.uid;
-
-                // 1. تسجيل الطلب في السجل
                 await addDoc(collection(db, "orders"), {
                     userId: uid,
                     userName: document.getElementById('uNameDisplay').innerText,
@@ -211,24 +204,13 @@
                     timestamp: serverTimestamp()
                 });
 
-                // 2. خصم الرصيد من الـ Firestore
-                const newBalance = currentBalance - price;
-                await updateDoc(doc(db, "users", uid), {
-                    balance: newBalance
-                });
-
-                // 3. تحديث الواجهة فوراً
+                await updateDoc(doc(db, "users", uid), { balance: currentBalance - price });
                 alert("تم إرسال الطلب بنجاح وخصم الرصيد ✅");
-                await updateUI(uid); // تحديث الأرقام المعروضة
-                
+                await updateUI(uid);
                 closeChatModal();
-                targetID.value = "";
-                coinInput.value = "";
-                document.getElementById('finalPrice').innerText = "0";
-
+                targetID.value = ""; coinInput.value = ""; document.getElementById('finalPrice').innerText = "0";
             } catch (e) {
                 alert("حدث خطأ، تأكد من اتصال الإنترنت.");
-                console.error(e);
             } finally {
                 btn.disabled = false;
                 btn.innerText = "تأكيد الطلب";
