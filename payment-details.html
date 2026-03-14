@@ -61,27 +61,24 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-app.js";
         import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-firestore.js";
-        import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-storage.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-auth.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAzsg4K2-AFKQwtlGbr--EszuUzQRQeYD8",
             authDomain: "foforecharge.firebaseapp.com",
             projectId: "foforecharge",
-            storageBucket: "foforecharge.appspot.com", // تأكد من صحة هذا الرابط من الكونسول
+            storageBucket: "foforecharge.appspot.com",
             messagingSenderId: "23143293034",
             appId: "1:23143293034:web:2a5e4e1914a7a8c6776a13"
         };
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
-        const storage = getStorage(app);
         const auth = getAuth(app);
 
         let currentUser = null;
         onAuthStateChanged(auth, user => currentUser = user);
 
-        // وظيفة تحديث اسم الملف عند الاختيار
         window.updateFileName = () => {
             const file = document.getElementById('proofImg').files[0];
             document.getElementById('file-name').innerText = file ? "✅ تم اختيار: " + file.name : "لم يتم اختيار صورة بعد";
@@ -93,7 +90,10 @@
             const file = document.getElementById('proofImg').files[0];
             const btn = document.getElementById('submitBtn');
 
-            // التحقق الإجباري
+            // بيانات Cloudinary الخاصة بك
+            const cloudName = "duaqzr8tt"; 
+            const uploadPreset = "Nasr_preset"; 
+
             if(!sender || amount < 100) return alert("يرجى إكمال البيانات والمبلغ (الأدنى 100)");
             if(!file) return alert("❌ يجب إرفاق صورة إيصال التحويل!");
 
@@ -101,10 +101,23 @@
             btn.innerText = "جاري رفع الصورة والطلب...";
 
             try {
-                // 1. رفع الصورة إلى Storage
-                const storageRef = ref(storage, `receipts/${Date.now()}_${currentUser.uid}`);
-                const snapshot = await uploadBytes(storageRef, file);
-                const downloadURL = await getDownloadURL(snapshot.ref);
+                // 1. الرفع إلى Cloudinary (مجاني)
+                const formData = new FormData();
+                formData.append('file', file);
+                formData.append('upload_preset', uploadPreset);
+
+                const cloudResponse = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const cloudData = await cloudResponse.json();
+                
+                if(!cloudData.secure_url) {
+                    throw new Error("فشل الرفع، تأكد من إعدادات Unsigned في Cloudinary");
+                }
+
+                const imageUrl = cloudData.secure_url;
 
                 // 2. حفظ الطلب في Firestore
                 await addDoc(collection(db, "deposit_requests"), {
@@ -112,7 +125,7 @@
                     userEmail: currentUser.email,
                     senderNumber: sender,
                     amount: Number(amount),
-                    proofImage: downloadURL, // رابط الصورة
+                    proofImage: imageUrl, 
                     status: "pending",
                     timestamp: serverTimestamp()
                 });
@@ -121,7 +134,7 @@
                 window.location.href = "dashboard.html";
             } catch (e) {
                 console.error(e);
-                alert("حدث خطأ أثناء الرفع، تأكد من إعدادات الـ Storage في فايربيز.");
+                alert("حدث خطأ أثناء الرفع. تأكد من تفعيل 'Unsigned' في Cloudinary وحفظ الإعدادات.");
                 btn.disabled = false;
                 btn.innerText = "إرسال الطلب للمراجعة";
             }
