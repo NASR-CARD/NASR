@@ -13,12 +13,9 @@
         .gold-bg { background: linear-gradient(135deg, #d4af37, #f9d976); }
         .dark-card { background: linear-gradient(145deg, #161616, #0f0f0f); border: 1px solid rgba(255,255,255,0.05); border-radius: 28px; transition: 0.3s; overflow: hidden; }
         .nav-blur { background: rgba(5, 5, 5, 0.9); backdrop-filter: blur(15px); border-bottom: 1px solid rgba(255,255,255,0.05); }
-        
-        /* شريط التنقل السفلي الاحترافي */
         .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; height: 85px; background: rgba(10, 10, 10, 0.98); backdrop-filter: blur(20px); border-top: 1px solid rgba(255,255,255,0.05); display: flex; justify-content: space-around; align-items: center; z-index: 100; }
         .home-btn-wrapper { position: relative; top: -20px; }
         .home-btn { width: 65px; height: 65px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 5px solid #050505; box-shadow: 0 8px 20px rgba(212, 175, 55, 0.4); }
-        
         .modal-animate { animation: slideUp 0.4s ease-out; }
         @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
         .info-row { display: flex; justify-content: space-between; padding: 12px; background: rgba(255,255,255,0.03); border-radius: 12px; margin-bottom: 10px; border: 1px solid rgba(255,255,255,0.05); }
@@ -39,7 +36,6 @@
     </nav>
 
     <div class="p-5 max-w-md mx-auto">
-        
         <div class="relative w-full rounded-[2.5rem] overflow-hidden mb-8 border border-white/5 shadow-2xl">
             <img src="bnar.png" class="w-full h-44 object-cover" onerror="this.src='https://img.freepik.com/free-vector/ramadan-kareem-banner-with-lanterns_1017-31181.jpg';">
             <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent flex items-end p-6">
@@ -80,23 +76,19 @@
             <i class="fas fa-history text-xl"></i>
             <span class="text-[9px] font-bold">السجل</span>
         </div>
-
         <div onclick="window.location.href='orders.html'" class="flex flex-col items-center gap-1 text-[#f9d976] cursor-pointer">
             <i class="fas fa-shopping-basket text-2xl"></i>
             <span class="text-[9px] font-bold">الطلبات</span>
         </div>
-
         <div onclick="window.location.href='dashboard.html'" class="home-btn-wrapper cursor-pointer">
             <div class="home-btn gold-bg text-black">
                 <i class="fas fa-home text-2xl"></i>
             </div>
         </div>
-
         <div class="flex flex-col items-center gap-1 text-gray-500 opacity-30">
             <i class="fas fa-wallet text-xl"></i>
             <span class="text-[9px] font-bold">المحفظة</span>
         </div>
-
         <div onclick="openSettingsModal()" class="flex flex-col items-center gap-1 text-gray-500 cursor-pointer">
             <i class="fas fa-user-gear text-xl"></i>
             <span class="text-[9px] font-bold">حسابي</span>
@@ -107,14 +99,12 @@
         <div class="bg-[#111] w-full max-w-sm rounded-[2.5rem] p-8 border border-white/10 modal-animate text-center shadow-2xl">
             <div class="w-20 h-20 gold-bg rounded-3xl mx-auto mb-6 flex items-center justify-center text-black font-black text-3xl shadow-lg rotate-3" id="modalInitial">U</div>
             <h3 class="gold-text font-black text-xl mb-8 italic uppercase tracking-tighter">My Account</h3>
-            
             <div class="space-y-3 text-right">
                 <div class="info-row"><span class="text-gray-500 text-[10px] font-bold">NAME</span><span id="set_name" class="text-white font-bold text-sm italic">-</span></div>
                 <div class="info-row"><span class="text-gray-500 text-[10px] font-bold">EMAIL</span><span id="set_email" class="text-white font-bold text-xs">-</span></div>
                 <div class="info-row"><span class="text-gray-500 text-[10px] font-bold">BALANCE</span><span id="set_balance" class="gold-text font-black text-sm">- EGP</span></div>
                 <div class="info-row"><span class="text-gray-500 text-[10px] font-bold">USER ID</span><span id="set_id" class="text-gray-400 font-mono text-[9px]">-</span></div>
             </div>
-
             <button onclick="closeSettingsModal()" class="w-full bg-[#222] text-white font-black py-4 rounded-2xl mt-8 active:scale-95 transition-all">إغلاق</button>
         </div>
     </div>
@@ -137,7 +127,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-app.js";
         import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-auth.js";
-        import { getFirestore, doc, getDoc, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-firestore.js";
+        import { getFirestore, doc, getDoc, collection, addDoc, serverTimestamp, updateDoc } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAzsg4K2-AFKQwtlGbr--EszuUzQRQeYD8",
@@ -152,30 +142,32 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // تحميل البيانات
         onAuthStateChanged(auth, async (user) => {
             if (!user) {
                 window.location.href = "index.html";
             } else {
-                try {
-                    const snap = await getDoc(doc(db, "users", user.uid));
-                    if (snap.exists()) {
-                        const data = snap.data();
-                        const name = data.name || "مستخدم نصر";
-                        const bal = data.balance || 0;
-                        document.getElementById('uNameDisplay').innerText = name;
-                        document.getElementById('uBalance').innerText = bal;
-                        document.getElementById('userInitial').innerText = name.charAt(0).toUpperCase();
-                        
-                        document.getElementById('set_name').innerText = name;
-                        document.getElementById('set_email').innerText = user.email;
-                        document.getElementById('set_balance').innerText = bal + " EGP";
-                        document.getElementById('set_id').innerText = user.uid;
-                        document.getElementById('modalInitial').innerText = name.charAt(0).toUpperCase();
-                    }
-                } catch (e) { console.error("Error fetching user data:", e); }
+                await updateUI(user.uid);
             }
         });
+
+        async function updateUI(uid) {
+            try {
+                const snap = await getDoc(doc(db, "users", uid));
+                if (snap.exists()) {
+                    const data = snap.data();
+                    const name = data.name || "مستخدم نصر";
+                    const bal = data.balance || 0;
+                    document.getElementById('uNameDisplay').innerText = name;
+                    document.getElementById('uBalance').innerText = bal;
+                    document.getElementById('userInitial').innerText = name.charAt(0).toUpperCase();
+                    document.getElementById('set_name').innerText = name;
+                    document.getElementById('set_email').innerText = auth.currentUser.email;
+                    document.getElementById('set_balance').innerText = bal + " EGP";
+                    document.getElementById('set_id').innerText = uid;
+                    document.getElementById('modalInitial').innerText = name.charAt(0).toUpperCase();
+                }
+            } catch (e) { console.error(e); }
+        }
 
         window.calculate = () => {
             const v = document.getElementById('coinInput').value;
@@ -187,20 +179,30 @@
         window.openChatModal = () => document.getElementById('chatModal').classList.remove('hidden');
         window.closeChatModal = () => document.getElementById('chatModal').classList.add('hidden');
 
-        // إرسال الطلب لـ Firebase بنجاح
+        // دالة إرسال الطلب مع التحقق وخصم الرصيد
         window.sendOrder = async () => {
             const id = targetID.value.trim();
             const amt = coinInput.value;
-            const price = finalPrice.innerText;
-            if(!id || amt < 100000) return alert("يرجى إدخال ID صحيح والحد الأدنى 100,000 كوين");
+            const price = Number(document.getElementById('finalPrice').innerText);
+            const currentBalance = Number(document.getElementById('uBalance').innerText);
+            
+            if(!id || amt < 100000) return alert("يرجى إدخال البيانات بشكل صحيح!");
+            
+            // التحقق من الرصيد
+            if (currentBalance < price) {
+                return alert("عذراً! رصيدك غير كافٍ لإتمام هذه العملية.");
+            }
 
             const btn = document.getElementById('orderBtn');
             btn.disabled = true;
-            btn.innerText = "جاري الحفظ...";
+            btn.innerText = "جاري معالجة طلبك...";
 
             try {
+                const uid = auth.currentUser.uid;
+
+                // 1. تسجيل الطلب في السجل
                 await addDoc(collection(db, "orders"), {
-                    userId: auth.currentUser.uid,
+                    userId: uid,
                     userName: document.getElementById('uNameDisplay').innerText,
                     targetID: id,
                     amount: amt,
@@ -208,13 +210,26 @@
                     status: "pending",
                     timestamp: serverTimestamp()
                 });
-                alert("تم إرسال طلبك بنجاح ✅ راقب صفحة الطلبات لمعرفة النتيجة.");
+
+                // 2. خصم الرصيد من الـ Firestore
+                const newBalance = currentBalance - price;
+                await updateDoc(doc(db, "users", uid), {
+                    balance: newBalance
+                });
+
+                // 3. تحديث الواجهة فوراً
+                alert("تم إرسال الطلب بنجاح وخصم الرصيد ✅");
+                await updateUI(uid); // تحديث الأرقام المعروضة
+                
                 closeChatModal();
                 targetID.value = "";
                 coinInput.value = "";
-                finalPrice.innerText = "0";
-            } catch (e) { alert("خطأ في الاتصال بالسيرفر!"); }
-            finally {
+                document.getElementById('finalPrice').innerText = "0";
+
+            } catch (e) {
+                alert("حدث خطأ، تأكد من اتصال الإنترنت.");
+                console.error(e);
+            } finally {
                 btn.disabled = false;
                 btn.innerText = "تأكيد الطلب";
             }
