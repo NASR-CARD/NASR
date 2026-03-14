@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>سجل الإيداعات - NASR CARD</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body { font-family: 'Cairo', sans-serif; background: #050505; color: #fff; padding: 20px; }
+        .gold-text { color: #f9d976; }
+        .deposit-card { background: #111; border: 1px solid #222; border-radius: 15px; padding: 15px; margin-bottom: 12px; }
+        .status-pending { color: #f9d976; background: rgba(249, 217, 118, 0.1); padding: 2px 8px; border-radius: 5px; }
+        .status-approved { color: #10b981; background: rgba(16, 185, 129, 0.1); padding: 2px 8px; border-radius: 5px; }
+        .status-rejected { color: #ef4444; background: rgba(239, 68, 68, 0.1); padding: 2px 8px; border-radius: 5px; }
+    </style>
+</head>
+<body>
+
+    <div class="max-w-md mx-auto pb-24">
+        <div class="flex items-center gap-4 mb-8">
+            <a href="dashboard.html" class="text-gray-400"><i class="fas fa-chevron-right"></i></a>
+            <h1 class="text-xl font-black gold-text italic uppercase">سجل الإيداعات</h1>
+        </div>
+
+        <div id="depositList" class="space-y-4">
+            <p class="text-center text-gray-600 py-10">جاري تحميل سجل الإيداعات...</p>
+        </div>
+    </div>
+
+    <div class="fixed bottom-0 left-0 right-0 bg-[#0a0a0a] border-t border-white/5 p-4 flex justify-around items-center z-50">
+        <a href="dashboard.html" class="flex flex-col items-center text-gray-500">
+            <i class="fas fa-home text-xl"></i>
+            <span class="text-[10px] mt-1">الرئيسية</span>
+        </a>
+        <a href="orders.html" class="flex flex-col items-center text-gray-500">
+            <i class="fas fa-shopping-cart text-xl"></i>
+            <span class="text-[10px] mt-1">الطلبات</span>
+        </a>
+        <a href="deposit-history.html" class="flex flex-col items-center text-[#f9d976]">
+            <i class="fas fa-file-invoice-dollar text-xl"></i>
+            <span class="text-[10px] mt-1">السجل</span>
+        </a>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-app.js";
+        import { getFirestore, collection, query, where, onSnapshot, orderBy } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-firestore.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-auth.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAzsg4K2-AFKQwtlGbr--EszuUzQRQeYD8",
+            authDomain: "foforecharge.firebaseapp.com",
+            projectId: "foforecharge",
+            storageBucket: "foforecharge.appspot.com",
+            messagingSenderId: "23143293034",
+            appId: "1:23143293034:web:2a5e4e1914a7a8c6776a13"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+
+        onAuthStateChanged(auth, user => {
+            if (user) {
+                loadDeposits(user.uid);
+            } else {
+                window.location.href = "index.html";
+            }
+        });
+
+        function loadDeposits(uid) {
+            const list = document.getElementById('depositList');
+            // استعلام لجلب إيداعات المستخدم الحالي فقط مرتبة من الأحدث
+            const q = query(collection(db, "deposit_requests"), where("userId", "==", uid));
+
+            onSnapshot(q, (snap) => {
+                if(snap.empty) {
+                    list.innerHTML = '<div class="text-center py-20"><i class="fas fa-receipt text-4xl text-gray-800 mb-3"></i><p class="text-gray-600">لا يوجد سجل إيداعات كاش</p></div>';
+                    return;
+                }
+
+                list.innerHTML = "";
+                snap.forEach(doc => {
+                    const d = doc.data();
+                    let statusClass = "status-pending";
+                    let statusText = "قيد المراجعة";
+
+                    if(d.status === 'approved') { statusClass = "status-approved"; statusText = "تم القبول ✅"; }
+                    if(d.status === 'rejected') { statusClass = "status-rejected"; statusText = "مرفوض ❌"; }
+
+                    list.innerHTML += `
+                        <div class="deposit-card border-l-2 ${d.status === 'approved' ? 'border-green-500' : (d.status === 'rejected' ? 'border-red-500' : 'border-[#f9d976]')}">
+                            <div class="flex justify-between items-center mb-3">
+                                <span class="text-[10px] uppercase font-bold text-gray-500">إيداع فودافون كاش</span>
+                                <span class="text-[9px] font-black ${statusClass}">${statusText}</span>
+                            </div>
+                            <div class="flex justify-between items-end">
+                                <div>
+                                    <p class="text-xs text-gray-400">المبلغ:</p>
+                                    <p class="text-xl font-black gold-text">${d.amount} <span class="text-[10px]">EGP</span></p>
+                                </div>
+                                <div class="text-left">
+                                    <p class="text-[9px] text-gray-600">من رقم: ${d.senderNumber}</p>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+            });
+        }
+    </script>
+</body>
+</html>
